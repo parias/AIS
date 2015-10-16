@@ -29,7 +29,7 @@ public class MobileAIS {
     private static double[] data;
     private static int D;
     private static double W;
-    private static int T;
+    private static double T;
     private static int r;
     private static String controlParam;
     private static double var;
@@ -56,11 +56,16 @@ public class MobileAIS {
         calculateMaxSTD();
 
         //run(getD());
-        controlParam = JOptionPane.showInputDialog("Control Param");
-        if (controlParam == "w") {
-            var = Double.parseDouble(JOptionPane.showInputDialog("Ending value to be used"));
-        } else {
-            var = Integer.parseInt(JOptionPane.showInputDialog("Value to be used"));
+        try {
+            controlParam = JOptionPane.showInputDialog("Control Param");
+            if (controlParam.compareTo("w") == 0 || controlParam.compareTo("t") == 0) {
+                var = Double.parseDouble(JOptionPane.showInputDialog("Ending value to be used"));
+            } else {
+                var = Integer.parseInt(JOptionPane.showInputDialog("Value to be used"));
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Did not supply values");
+            System.exit(0);
         }
 
         variation(controlParam, var);
@@ -120,7 +125,7 @@ public class MobileAIS {
     }
 
     public static void run(double n) {
-        //System.out.println("Original number for n: " + n);
+
         Random rand = new Random();
         ArrayList<Detector> mature = new ArrayList();
 
@@ -149,9 +154,7 @@ public class MobileAIS {
             for (int t = 0; t < self.getSize() / 2; t++) {
                 if (detector.compareTo(self.getApp(t), getR()) == 0) {
                     matches = true;
-//                    Detector upDetector = detector.splitUp(self.getApp(position), max);
-//                    Detector downDetector = detector.splitDown(self.getApp(position));
-//                    
+
                     Detector upDetector = detector.splitUpSTD(self.getApp(t), std, getT(), max);
                     Detector downDetector = detector.splitDownSTD(self.getApp(t), std, getT());
 
@@ -185,7 +188,6 @@ public class MobileAIS {
         }
 
         int matureDetectors = mature.size();
-        //System.out.println("Number of mature detectors: " + mature.size());
 
         int[] detected = new int[nonSelf.getSize()];
 
@@ -211,8 +213,6 @@ public class MobileAIS {
 
         int appIdentifiedTotal = nonSelf.getSize();
         double accuracy = 100 * ((double) count / (double) nonSelf.getSize());
-        //System.out.println("Number of apps identified: " + count + " of " + nonSelf.getSize());
-        //System.out.println("The accuracy is: " + accuracy);
 
         for (int i = 0; i < detected.length; i++) {
             detected[i] = 0;
@@ -236,8 +236,7 @@ public class MobileAIS {
 
         int numberAppsMatchedTotal = (self.getSize() - (self.getSize() / 2));
         double falsePositive = ((double) count / ((double) (self.getSize()) / 2)) * 100;
-        //System.out.println("Number of apps matched: " + count + " of " + numberAppsMatchedTotal);
-        //System.out.println("False positive: " + falsePositive);
+
         output(matureDetectors, appIdentifiedTotal, accuracy, numberAppsMatchedTotal, falsePositive);
 
     }
@@ -274,29 +273,33 @@ public class MobileAIS {
     public static void variation(String controlParams, double vars) {
         System.out.println("Varying " + controlParams);
         if (controlParams.compareTo("w") == 0) {
-            int stop = (int)vars * 100;
-            for (int i = 0; i < stop; i ++) {
-                System.out.println(i*0.01);
-                setW(i*.01);
+            int stop = (int) vars * 100;
+            for (int i = 0; i < stop; i++) {
+                double width = i * 0.01;
+                System.out.println(width);
+                setW(width);
                 run(getD());
             }
-            /*
-             } else if (controlParam.compareTo("d") == 0) {
-             for (double i = 0; i < var; i += .01) {
-             setD((int) var);
-             run(D);
-             }
-             */
+
+        } else if (controlParams.compareTo("d") == 0) {
+            for (int i = 0; i < vars; i++) {
+                setD(i);
+                System.out.println("d: " + getD());
+                run(getD());
+            }
+
         } else if (controlParams.compareTo("r") == 0) {
-            for (double i = 0; i < vars; i++) {
-                setR((int) vars);
-                System.out.println(getR());
+            for (int i = 460; i < vars; i += 20) {
+                setR(i);
+                System.out.println("r: " + getR());
                 run(getD());
             }
         } else if (controlParams.compareTo("t") == 0) {
-            for (double i = 1; i <= 4; i++) {
-                setT((int) vars);
-                System.out.println(getR());
+            int stop = (int) vars * 2;
+            for (int i = 0; i <= stop; i++) {
+                double tao = i * 0.5;
+                setT(tao);
+                System.out.println("t: " + tao);
                 run(getD());
             }
         }
@@ -333,14 +336,14 @@ public class MobileAIS {
     /**
      * @return the T
      */
-    public static int getT() {
+    public static double getT() {
         return T;
     }
 
     /**
      * @param aT the T to set
      */
-    public static void setT(int aT) {
+    public static void setT(double aT) {
         T = aT;
     }
 
@@ -359,18 +362,19 @@ public class MobileAIS {
     }
 
     private static void output(int matureDetectors, int appIdentifiedTotal, double accuracy, int numberAppsMatchedTotal, double falsePositive) {
-        System.out.println(matureDetectors + " " + appIdentifiedTotal + " " + accuracy + " " + numberAppsMatchedTotal + " " + falsePositive );
+        System.out.println(matureDetectors + " " + appIdentifiedTotal + " " + accuracy + " " + numberAppsMatchedTotal + " " + falsePositive);
+
+        //For printResults();
         results += " w: " + getW() + " " + matureDetectors + " " + appIdentifiedTotal + " " + accuracy + " " + numberAppsMatchedTotal + " " + falsePositive + "\n";
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static void printResults() {
-        try {
-            PrintWriter write = new PrintWriter("Results.txt");
-            
+
+        try (PrintWriter write = new PrintWriter("Results.txt")) {
             write.printf(results);
-            
+
             write.flush();
-            write.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

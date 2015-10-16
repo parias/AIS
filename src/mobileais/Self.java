@@ -12,13 +12,13 @@ import java.util.ArrayList;
  * @author James
  */
 public class Self {
-    
+
     private ArrayList<App> apps;
-    
-    public Self () {
+
+    public Self() {
         apps = new ArrayList();
     }
-    
+
     public App getApp(int index) {
         return apps.get(index);
     }
@@ -26,9 +26,9 @@ public class Self {
     public void addApp(App app) {
         apps.add(app);
     }
-    
+
     public int getSize() {
         return apps.size();
     }
-    
+
 }

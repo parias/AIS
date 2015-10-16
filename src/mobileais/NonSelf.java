@@ -12,13 +12,13 @@ import java.util.ArrayList;
  * @author James
  */
 public class NonSelf {
-    
+
     private ArrayList<App> apps;
-    
-    public NonSelf () {
+
+    public NonSelf() {
         apps = new ArrayList();
     }
-    
+
     public App getApp(int index) {
         return apps.get(index);
     }
@@ -26,7 +26,7 @@ public class NonSelf {
     public void addApp(App app) {
         apps.add(app);
     }
-    
+
     public int getSize() {
         return apps.size();
     }
