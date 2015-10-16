@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -61,7 +62,7 @@ public class MobileAIS {
             if (controlParam.compareTo("w") == 0 || controlParam.compareTo("t") == 0) {
                 var = Double.parseDouble(JOptionPane.showInputDialog("Ending value to be used"));
             } else {
-                var = Integer.parseInt(JOptionPane.showInputDialog("Value to be used"));
+                var = Integer.parseInt(JOptionPane.showInputDialog("Ending Value to be used"));
             }
         } catch (NullPointerException e) {
             System.out.println("Did not supply values");
@@ -282,14 +283,14 @@ public class MobileAIS {
             }
 
         } else if (controlParams.compareTo("d") == 0) {
-            for (int i = 0; i < vars; i++) {
+            for (int i = 0; i < vars; i += 100) {
                 setD(i);
                 System.out.println("d: " + getD());
                 run(getD());
             }
 
         } else if (controlParams.compareTo("r") == 0) {
-            for (int i = 460; i < vars; i += 20) {
+            for (int i = 400; i < vars; i += 10) {
                 setR(i);
                 System.out.println("r: " + getR());
                 run(getD());
@@ -363,15 +364,18 @@ public class MobileAIS {
 
     private static void output(int matureDetectors, int appIdentifiedTotal, double accuracy, int numberAppsMatchedTotal, double falsePositive) {
         System.out.println(matureDetectors + " " + appIdentifiedTotal + " " + accuracy + " " + numberAppsMatchedTotal + " " + falsePositive);
-
-        //For printResults();
-        results += " w: " + getW() + " " + matureDetectors + " " + appIdentifiedTotal + " " + accuracy + " " + numberAppsMatchedTotal + " " + falsePositive + "\n";
+        DecimalFormat formatter = new DecimalFormat("#.####");
+        
+        //Utilized in printResults();
+        results += " R: " + getR() + "\t"+  formatter.format(matureDetectors) + "\t" + formatter.format(appIdentifiedTotal) + "\t" 
+                + formatter.format(accuracy) + "\t" + formatter.format(numberAppsMatchedTotal) + "\t"
+                + formatter.format(falsePositive) + "\n";
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
     private static void printResults() {
 
-        try (PrintWriter write = new PrintWriter("Results.txt")) {
+        try (PrintWriter write = new PrintWriter("Results R.txt")) {
             write.printf(results);
 
             write.flush();
