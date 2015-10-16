@@ -276,8 +276,8 @@ public class MobileAIS {
         if (controlParams.compareTo("w") == 0) {
             int stop = (int)vars * 100;
             for (int i = 0; i < stop; i ++) {
+                System.out.println(i*0.01);
                 setW(i*.01);
-                System.out.println(getW());
                 run(getD());
             }
             /*
